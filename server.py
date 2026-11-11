@@ -1,6 +1,7 @@
 """Flask web interface for the Watson NLP emotion detector."""
 
 from flask import Flask, render_template, request
+from requests.exceptions import RequestException
 
 from EmotionDetection import emotion_detector
 
@@ -26,17 +27,15 @@ def detect_emotion():
 
     try:
         result = emotion_detector(text_to_analyze)
-    except Exception:
+    except (RequestException, KeyError, IndexError, TypeError, ValueError):
         app.logger.exception("Emotion analysis request failed")
         return "Emotion analysis is temporarily unavailable.", 502
 
     if result["dominant_emotion"] is None:
         return "The service could not analyze that text. Please try a different input.", 400
 
-    scores = ", ".join(
-        f"{emotion}: {result[emotion]:.3f}"
-        for emotion in ("anger", "disgust", "fear", "joy", "sadness")
-    )
+    emotions = ("anger", "disgust", "fear", "joy", "sadness")
+    scores = ", ".join(f"{emotion}: {result[emotion]:.3f}" for emotion in emotions)
     return (
         f"For the given statement, the system response is {scores}. "
         f"The dominant emotion is {result['dominant_emotion']}."
@@ -44,4 +43,5 @@ def detect_emotion():
 
 
 if __name__ == "__main__":
+    # Static analysis command: python3 -m pylint server.py emotion_detection.py EmotionDetection/emotion_detection.py test_emotion_detection.py
     app.run(host="0.0.0.0", port=5000, debug=False)
