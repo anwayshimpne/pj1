@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emotion Detector</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 3rem auto; padding: 0 1rem; color: #202638; }
+    textarea { box-sizing: border-box; width: 100%; min-height: 9rem; padding: .8rem; font: inherit; }
+    button { margin-top: .8rem; padding: .65rem 1rem; cursor: pointer; }
+    #result { margin-top: 1.2rem; padding: 1rem; background: #f1f4f9; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Emotion Detector</h1>
+  <p>Enter a statement to detect its emotions.</p>
+  <form id="emotion-form">
+    <label for="textToAnalyze">Text to analyze</label>
+    <textarea id="textToAnalyze" name="textToAnalyze" placeholder="Type a statement..."></textarea>
+    <button type="submit">Analyze emotions</button>
+  </form>
+  <div id="result" role="status" aria-live="polite"></div>
+  <script>
+    document.getElementById('emotion-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const result = document.getElementById('result');
+      const form = new FormData(event.currentTarget);
+      try {
+        const response = await fetch('/emotionDetector', { method: 'POST', body: form });
+        result.textContent = await response.text();
+      } catch (error) {
+        result.textContent = 'Could not connect to the emotion detector. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>
